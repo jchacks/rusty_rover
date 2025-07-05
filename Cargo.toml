@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 embedded-hal = "1.0.0"
+embedded-hal-bus = { version = "0.3.0", features = ["std"] }
 linux-embedded-hal = "0.4.0"

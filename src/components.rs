@@ -1,4 +1,4 @@
-use linux_embedded_hal::{Delay, I2cdev};
+use embedded_hal::i2c::I2c;
 
 use crate::drivers::pca9685;
 
@@ -15,22 +15,20 @@ const MAX_ANGLE: f32 = 162.0;
 const COUNTS_MIN: f32 = 102.0;
 const COUNTS_MAX: f32 = 512.0;
 
-struct Servo {
-    driver: pca9685::Driver<I2cdev>,
+pub struct Servo {
     channel: u8,
 }
 
 impl Servo {
-    fn new(channel: u8) -> Self {
-        let dev = I2cdev::new("/dev/i2c-1").unwrap();
-        let mut driver = pca9685::Driver::new(dev);
-
-        driver.set_pwm_freq(50.0f32, &mut Delay);
-        Self { driver, channel }
+    pub fn new(channel: u8) -> Self {
+        Self { channel }
     }
 
-    pub fn set_angle(&mut self, deg: f32) {
+    pub fn set_angle<I2C>(&mut self, pwm: &mut pca9685::Driver<I2C>, deg: f32)
+    where
+        I2C: I2c,
+    {
         let data = (deg.clamp(MIN_ANGLE, MAX_ANGLE) * (COUNTS_MAX - COUNTS_MIN) / 180.0) as u16;
-        self.driver.set_pwm(self.channel, 0, data);
+        pwm.set_pwm(self.channel, 0, data);
     }
 }

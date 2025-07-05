@@ -1,7 +1,6 @@
 use embedded_hal::delay::DelayNs;
 use embedded_hal::i2c::{I2c, Operation as I2cOperation};
-
-use linux_embedded_hal::{Delay, I2cdev};
+use linux_embedded_hal::I2cdev;
 
 const SUBADR1: u8 = 0x02;
 const SUBADR2: u8 = 0x03;
@@ -72,11 +71,4 @@ where
         ];
         self.i2c.write(ADDR, &data);
     }
-}
-
-fn main() {
-    let dev = I2cdev::new("/dev/i2c-1").unwrap();
-    let mut driver = Driver::new(dev);
-    let value = driver.read_something().unwrap();
-    println!("Read value: {}", value);
 }

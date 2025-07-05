@@ -1,4 +1,4 @@
-use embedded_hal::i2c::{I2c, Operation as I2cOperation};
+use embedded_hal::i2c::I2c;
 
 const ADDR: u8 = 0x48;
 /// Command-byte template: SD = 1 (single-ended), PD = 01 (powered, no refs off)
