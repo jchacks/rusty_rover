@@ -18,10 +18,10 @@ pub struct RoboDog {
 
 impl RoboDog {
     pub fn new() -> Self {
-        let i2c_ref = Rc::new(RefCell::new(I2cdev::new("/dev/i2c-1").unwrap()));
+        let bus = Rc::new(RefCell::new(I2cdev::new("/dev/i2c-1").unwrap()));
 
-        let mut ads7830 = ads7830::Driver::new(RcDevice::new(i2c_ref.clone()));
-        let mut pca9685 = pca9685::Driver::new(RcDevice::new(i2c_ref));
+        let mut ads7830 = ads7830::Driver::new(RcDevice::new(Rc::clone(&bus)));
+        let mut pca9685 = pca9685::Driver::new(RcDevice::new(Rc::clone(&bus)));
         let mut delay = Delay;
         pca9685.set_pwm_freq(50.0f32, &mut delay);
 
