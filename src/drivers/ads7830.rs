@@ -4,7 +4,7 @@ const ADDR: u8 = 0x48;
 /// Command-byte template: SD = 1 (single-ended), PD = 01 (powered, no refs off)
 const CMD_TEMPLATE: u8 = 0b1000_0100;
 const VREF: f32 = 5.0; // external 5 V reference
-const DIVIDER: f32 = 3.0;
+const DIVIDER: f32 = 3.0; // v1.0 to v1.9 = 3; v2+ = 2
 
 const MEDIAN_SAMPLES: usize = 9;
 const MEDIAN_INDEX: usize = MEDIAN_SAMPLES / 2;
@@ -32,10 +32,10 @@ where
             .and(Ok(read_buffer[0]))
     }
 
-    pub fn battery_voltage(&mut self, channel: u8) -> Result<f32, I2C::Error> {
+    pub fn battery_voltage(&mut self) -> Result<f32, I2C::Error> {
         let mut samples = [0u8; MEDIAN_SAMPLES];
         for s in samples.iter_mut() {
-            *s = self.read_adc(channel)?;
+            *s = self.read_adc(0)?;
         }
         samples.sort_unstable();
         let code = samples[MEDIAN_INDEX] as f32;

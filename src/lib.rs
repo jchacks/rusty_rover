@@ -33,4 +33,8 @@ impl RoboDog {
             servos,
         }
     }
+
+    pub fn get_battery_voltage(&mut self) -> f32 {
+        self.ads7830.battery_voltage().unwrap()
+    }
 }
