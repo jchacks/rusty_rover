@@ -26,7 +26,7 @@ impl Servo {
 
     pub fn set_angle<I2C>(
         &mut self,
-        pwm: &mut pca9685::Driver<I2C>,
+        pwm: &mut pca9685::Pca9685<I2C>,
         deg: f32,
     ) -> Result<(), I2C::Error>
     where

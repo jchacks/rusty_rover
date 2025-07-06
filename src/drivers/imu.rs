@@ -1,9 +1,9 @@
 use std::time::Instant;
 
 use embedded_hal::i2c::I2c;
-use linux_embedded_hal::{Delay, I2CError, I2cdev};
+use linux_embedded_hal::I2CError;
 use mpu6050::{
-    Mpu6050, Mpu6050Error,
+    Mpu6050,
     device::{AccelRange, GyroRange},
 };
 use nalgebra::{Quaternion, Vector3};
@@ -45,7 +45,6 @@ pub struct Imu {
     q: Quaternion<f32>,
     k_p: f32,
     k_i: f32,
-    half_t: f32,
     integral: Vector3<f32>,
     last_ts: Instant,
 }
@@ -73,7 +72,6 @@ impl Imu {
             q: Quaternion::identity(),
             k_p: 100.0,
             k_i: 0.002,
-            half_t: 0.05,
             integral: Vector3::zeros(),
             last_ts,
         })

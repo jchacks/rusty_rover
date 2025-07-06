@@ -18,14 +18,14 @@ const ALLLED_OFF_H: u8 = 0xFD;
 
 const ADDR: u8 = 0x40;
 
-pub struct Driver<I2C>
+pub struct Pca9685<I2C>
 where
     I2C: I2c,
 {
     i2c: I2C,
 }
 
-impl<I2C> Driver<I2C>
+impl<I2C> Pca9685<I2C>
 where
     I2C: I2c,
 {
@@ -113,7 +113,7 @@ where
     }
 }
 
-impl<I2C> Drop for Driver<I2C>
+impl<I2C> Drop for Pca9685<I2C>
 where
     I2C: I2c,
 {
@@ -150,7 +150,7 @@ mod tests {
         ];
 
         let i2c = I2cMock::new(&expectations);
-        let mut drv = Driver::new(i2c);
+        let mut drv = Pca9685::new(i2c);
         let mut delay = NoopDelay;
 
         drv.set_pwm_freq(50.0, &mut delay).unwrap();
@@ -173,7 +173,7 @@ mod tests {
         ];
 
         let i2c = I2cMock::new(&expectations);
-        let mut drv = Driver::new(i2c);
+        let mut drv = Pca9685::new(i2c);
         let mut delay = NoopDelay;
 
         drv.set_pwm_freq(1_000.0, &mut delay).unwrap();
@@ -188,7 +188,7 @@ mod tests {
         // on = 0x0000, off = 0x0100
         let expectations = [T::write(ADDR, vec![LED0_ON_L, 0x00, 0x00, 0x00, 0x01])];
         let i2c = I2cMock::new(&expectations);
-        let mut drv = Driver::new(i2c);
+        let mut drv = Pca9685::new(i2c);
         drv.set_pwm(0, 0x0000, 0x0100).unwrap();
         drv.i2c.done();
     }
@@ -203,7 +203,7 @@ mod tests {
         // on = 0x1234, off = 0xABCD
         let expectations = [T::write(ADDR, vec![base, 0x34, 0x12, 0xCD, 0xAB])];
         let i2c = I2cMock::new(&expectations);
-        let mut drv = Driver::new(i2c);
+        let mut drv = Pca9685::new(i2c);
 
         drv.set_pwm(15, 0x1234, 0xABCD).unwrap();
         drv.i2c.done();

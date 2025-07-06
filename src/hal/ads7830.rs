@@ -9,16 +9,16 @@ const DIVIDER: f32 = 3.0; // v1.0 to v1.9 = 3; v2+ = 2
 const MEDIAN_SAMPLES: usize = 9;
 const MEDIAN_INDEX: usize = MEDIAN_SAMPLES / 2;
 
-pub struct Driver<I2C> {
+pub struct Ads7830<I2C> {
     i2c: I2C,
 }
 
-impl<I2C> Driver<I2C>
+impl<I2C> Ads7830<I2C>
 where
     I2C: I2c,
 {
     pub fn new(i2c: I2C) -> Self {
-        Driver { i2c }
+        Ads7830 { i2c }
     }
 
     pub fn read_adc(&mut self, channel: u8) -> Result<u8, I2C::Error> {

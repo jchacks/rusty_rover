@@ -12,8 +12,8 @@ mod drivers;
 mod hal;
 
 pub struct RoboDog {
-    ads7830: ads7830::Driver<RcDevice<I2cdev>>,
-    pca9685: pca9685::Driver<RcDevice<I2cdev>>,
+    ads7830: ads7830::Ads7830<RcDevice<I2cdev>>,
+    pca9685: pca9685::Pca9685<RcDevice<I2cdev>>,
     mpu6050: mpu6050::Mpu6050<RcDevice<I2cdev>>,
     servos: [Servo; 16],
     imu: Imu,
@@ -23,8 +23,8 @@ impl RoboDog {
     pub fn new() -> Self {
         let bus = Rc::new(RefCell::new(I2cdev::new("/dev/i2c-1").unwrap()));
 
-        let ads7830 = ads7830::Driver::new(RcDevice::new(Rc::clone(&bus)));
-        let mut pca9685 = pca9685::Driver::new(RcDevice::new(Rc::clone(&bus)));
+        let ads7830 = ads7830::Ads7830::new(RcDevice::new(Rc::clone(&bus)));
+        let mut pca9685 = pca9685::Pca9685::new(RcDevice::new(Rc::clone(&bus)));
         let mut delay = Delay;
         pca9685.reset(&mut delay).unwrap();
         pca9685
