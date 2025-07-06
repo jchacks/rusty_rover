@@ -5,6 +5,7 @@ const SUBADR1: u8 = 0x02;
 const SUBADR2: u8 = 0x03;
 const SUBADR3: u8 = 0x04;
 const MODE1: u8 = 0x00;
+const MODE2: u8 = 0x01;
 const PRESCALE: u8 = 0xFE;
 const LED0_ON_L: u8 = 0x06;
 const LED0_ON_H: u8 = 0x07;
@@ -17,7 +18,10 @@ const ALLLED_OFF_H: u8 = 0xFD;
 
 const ADDR: u8 = 0x40;
 
-pub struct Driver<I2C> {
+pub struct Driver<I2C>
+where
+    I2C: I2c,
+{
     i2c: I2C,
 }
 
@@ -26,7 +30,33 @@ where
     I2C: I2c,
 {
     pub fn new(i2c: I2C) -> Self {
-        Driver { i2c }
+        Self { i2c }
+    }
+
+    /// Bring the PCA9685 into a known state after power-on.
+    pub fn reset<D>(&mut self, delay: &mut D) -> Result<(), I2C::Error>
+    where
+        D: embedded_hal::delay::DelayNs,
+    {
+        self.i2c.write(ADDR, &[MODE1, 0x00])?;
+        delay.delay_us(500);
+
+        Ok(())
+    }
+
+    pub fn auto_increment_enabled(&mut self) -> Result<bool, I2C::Error> {
+        let mut buf = [0u8];
+        self.i2c.write_read(ADDR, &[MODE1], &mut buf)?;
+        Ok(buf[0] & 0x20 != 0)
+    }
+
+    pub fn ensure_auto_increment(&mut self) -> Result<(), I2C::Error> {
+        if !self.auto_increment_enabled()? {
+            let mut mode1 = [0u8];
+            self.i2c.write_read(ADDR, &[MODE1], &mut mode1)?;
+            self.i2c.write(ADDR, &[MODE1, mode1[0] | 0x20])?;
+        }
+        Ok(())
     }
 
     pub fn set_pwm_freq<D>(&mut self, freq: f32, delay: &mut D) -> Result<(), I2C::Error>
@@ -46,8 +76,8 @@ where
         Ok(())
     }
 
-    pub fn set_pwm(&mut self, channel: u8, on: u16, off: u16) -> Result<(), I2C::Error> {
-        let base = LED0_ON_L + 4 * channel;
+    pub fn set_pwm(&mut self, ch: u8, on: u16, off: u16) -> Result<(), I2C::Error> {
+        let base = LED0_ON_L + 4 * ch;
         let data = [
             base,
             (on & 0xFF) as u8,
@@ -55,8 +85,40 @@ where
             (off & 0xFF) as u8,
             (off >> 8) as u8,
         ];
+        println!("Sending: {:?}", data);
         self.i2c.write(ADDR, &data)?;
         Ok(())
+    }
+
+    pub fn enable_channel(&mut self, ch: u8) -> Result<(), I2C::Error> {
+        let off_h = LED0_OFF_H + 4 * ch;
+        self.i2c.write(ADDR, &[off_h, 0x00])?;
+        Ok(())
+    }
+
+    pub fn disable_channel(&mut self, ch: u8) -> Result<(), I2C::Error> {
+        let on_h = LED0_ON_H + 4 * ch; // 0x07 + 4·ch
+        let off_h = LED0_OFF_H + 4 * ch; // 0x09 + 4·ch
+
+        self.i2c.write(ADDR, &[on_h, 0x00])?; // bit 4 = 0
+        self.i2c.write(ADDR, &[off_h, 0x10])?; // bit 4 = 1
+        Ok(())
+    }
+
+    /// Force ALL outputs low (FULL_OFF) until re-enabled.
+    pub fn disable_all(&mut self) -> Result<(), I2C::Error> {
+        self.i2c.write(ADDR, &[ALLLED_ON_H, 0x00])?;
+        self.i2c.write(ADDR, &[ALLLED_OFF_H, 0x10])?;
+        Ok(())
+    }
+}
+
+impl<I2C> Drop for Driver<I2C>
+where
+    I2C: I2c,
+{
+    fn drop(&mut self) {
+        self.disable_all().expect("could not disable servos");
     }
 }
 

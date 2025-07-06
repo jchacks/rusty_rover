@@ -1,2 +1,5 @@
-pub mod ads7830;
-pub mod pca9685;
+mod imu;
+mod servo;
+
+pub use imu::Imu;
+pub use servo::Servo;

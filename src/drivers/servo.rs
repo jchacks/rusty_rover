@@ -1,6 +1,6 @@
 use embedded_hal::i2c::I2c;
 
-use crate::drivers::pca9685;
+use crate::hal::pca9685;
 
 const MIN_ANGLE: f32 = 18.0;
 const MAX_ANGLE: f32 = 162.0;
@@ -16,7 +16,7 @@ const COUNTS_MIN: f32 = 102.0;
 const COUNTS_MAX: f32 = 512.0;
 
 pub struct Servo {
-    channel: u8,
+    pub channel: u8,
 }
 
 impl Servo {
@@ -24,11 +24,19 @@ impl Servo {
         Self { channel }
     }
 
-    pub fn set_angle<I2C>(&mut self, pwm: &mut pca9685::Driver<I2C>, deg: f32)
+    pub fn set_angle<I2C>(
+        &mut self,
+        pwm: &mut pca9685::Driver<I2C>,
+        deg: f32,
+    ) -> Result<(), I2C::Error>
     where
         I2C: I2c,
     {
-        let data = (deg.clamp(MIN_ANGLE, MAX_ANGLE) * (COUNTS_MAX - COUNTS_MIN) / 180.0) as u16;
-        pwm.set_pwm(self.channel, 0, data);
+        let data = (COUNTS_MIN
+            + (deg.clamp(MIN_ANGLE, MAX_ANGLE) * (COUNTS_MAX - COUNTS_MIN) / 180.0))
+            as u16;
+        println!("Setting servo {} to {deg}", self.channel);
+        pwm.set_pwm(self.channel, 0, data)?;
+        Ok(())
     }
 }

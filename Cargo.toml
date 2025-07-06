@@ -4,9 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+ctrlc = "3.4.7"
 embedded-hal = "1.0.0"
 embedded-hal-bus = { version = "0.3.0", features = ["std"] }
 linux-embedded-hal = "0.4.0"
+mpu6050 = { git = "https://github.com/jchacks/mpu6050", branch = "master" }
+
+nalgebra = "0.33.2"
 
 [dev-dependencies]
 embedded-hal-mock = "0.11.1"
