@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use robotdog_rust::RoboDog;
+use rusty_rover::RoboDog;
 
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mut dog = RoboDog::new();
