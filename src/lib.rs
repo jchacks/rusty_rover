@@ -4,7 +4,6 @@ use crate::{
     drivers::{Imu, Servo},
     hal::{ads7830, pca9685},
 };
-use embedded_hal::delay::DelayNs;
 use embedded_hal_bus::i2c::RcDevice;
 use linux_embedded_hal::{Delay, I2cdev};
 use mpu6050;
